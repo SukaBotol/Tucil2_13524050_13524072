@@ -482,6 +482,90 @@ public class test {
         }
     }
 
+    public static void raycastingIt(Tree.Node node, ArrayList<face> candidateFaces, double epsilon,
+            double rootMinX, double rootMinY, double rootMinZ, double step) {
+        if (candidateFaces.isEmpty()) {
+            return;
+        }
+
+        if (Tree.is_leaf(node)) {
+            vertex center = new vertex(
+                    (node.surrounding[3].x + node.surrounding[5].x) / 2,
+                    (node.surrounding[3].y + node.surrounding[5].y) / 2,
+                    (node.surrounding[3].z + node.surrounding[5].z) / 2);
+
+            for (face f : candidateFaces) {
+                vertex intersection = new vertex(0, 0, 0);
+
+                vertex origin = new vertex(rootMinX - step, center.y, center.z);
+                vertex dir = new vertex(1, 0, 0);
+                if (raycasting(origin, dir, f, intersection)) {
+                    intersection.x += epsilon;
+                    if (Tree.is_in_cube(node, intersection)) {
+                        node.isActive = true;
+                        return;
+                    }
+                }
+
+                origin = new vertex(center.x, rootMinY - step, center.z);
+                dir = new vertex(0, 1, 0);
+                if (raycasting(origin, dir, f, intersection)) {
+                    intersection.y += epsilon;
+                    if (Tree.is_in_cube(node, intersection)) {
+                        node.isActive = true;
+                        return;
+                    }
+                }
+
+                origin = new vertex(center.x, center.y, rootMinZ - step);
+                dir = new vertex(0, 0, 1);
+                if (raycasting(origin, dir, f, intersection)) {
+                    intersection.z += epsilon;
+                    if (Tree.is_in_cube(node, intersection)) {
+                        node.isActive = true;
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+
+        for (int i = 0; i < 8; i++) {
+            if (node.children[i] == null) {
+                continue;
+            }
+
+            ArrayList<face> childFaces = new ArrayList<face>();
+            for (face f : candidateFaces) {
+                double faceMinX = Math.min(f.a.x, Math.min(f.b.x, f.c.x));
+                double faceMinY = Math.min(f.a.y, Math.min(f.b.y, f.c.y));
+                double faceMinZ = Math.min(f.a.z, Math.min(f.b.z, f.c.z));
+                double faceMaxX = Math.max(f.a.x, Math.max(f.b.x, f.c.x));
+                double faceMaxY = Math.max(f.a.y, Math.max(f.b.y, f.c.y));
+                double faceMaxZ = Math.max(f.a.z, Math.max(f.b.z, f.c.z));
+
+                double nodeMinX = node.children[i].surrounding[3].x;
+                double nodeMinY = node.children[i].surrounding[3].y;
+                double nodeMinZ = node.children[i].surrounding[3].z;
+                double nodeMaxX = node.children[i].surrounding[5].x;
+                double nodeMaxY = node.children[i].surrounding[5].y;
+                double nodeMaxZ = node.children[i].surrounding[5].z;
+
+                if (!(faceMaxX < nodeMinX || faceMinX > nodeMaxX ||
+                        faceMaxY < nodeMinY || faceMinY > nodeMaxY ||
+                        faceMaxZ < nodeMinZ || faceMinZ > nodeMaxZ)) {
+                    childFaces.add(f);
+                }
+            }
+
+            if (!childFaces.isEmpty()) {
+                node.isActive = true;
+                raycastingIt(node.children[i], childFaces, epsilon, rootMinX, rootMinY, rootMinZ,
+                        step);
+            }
+        }
+    }
+
     public static String objToVoxeL(File file, int depth, String outputName) throws Exception {
         max = new vertex(-999999, -999999, -999999);
         min = new vertex(999999, 999999, 999999);
@@ -541,53 +625,8 @@ public class test {
 
         double minx = ocTree.root.surrounding[3].x, miny =
                 ocTree.root.surrounding[3].y, minz = ocTree.root.surrounding[3].z;
-        double maxx = ocTree.root.surrounding[5].x, maxy =
-                ocTree.root.surrounding[5].y, maxz = ocTree.root.surrounding[5].z;
 
-        for (double y = miny + steps / 2; y < maxy; y += steps) {
-            for (double z = minz + steps / 2; z < maxz; z += steps) {
-                vertex origin = new vertex(minx - steps, y, z);
-                // x axis
-                vertex dir = new vertex(1, 0, 0);
-                for (face f : faces) {
-                    vertex intersection = new vertex(0, 0, 0);
-                    if (raycasting(origin, dir, f, intersection)) {
-                        intersection.x += epsilon;
-                        process_vertices(intersection, ocTree.root);
-                    }
-                }
-            }
-        }
-
-        for (double x = minx + steps / 2; x < maxx; x += steps) {
-            for (double z = minz + steps / 2; z < maxz; z += steps) {
-                vertex origin = new vertex(x, miny - steps, z);
-                // y axis
-                vertex dir = new vertex(0, 1, 0);
-                for (face f : faces) {
-                    vertex intersection = new vertex(0, 0, 0);
-                    if (raycasting(origin, dir, f, intersection)) {
-                        intersection.y += epsilon;
-                        process_vertices(intersection, ocTree.root);
-                    }
-                }
-            }
-        }
-
-        for (double x = minx + steps / 2; x < maxx; x += steps) {
-            for (double y = miny + steps / 2; y < maxy; y += steps) {
-                vertex origin = new vertex(x, y, minz - steps);
-                // z axis
-                vertex dir = new vertex(0, 0, 1);
-                for (face f : faces) {
-                    vertex intersection = new vertex(0, 0, 0);
-                    if (raycasting(origin, dir, f, intersection)) {
-                        intersection.z += epsilon;
-                        process_vertices(intersection, ocTree.root);
-                    }
-                }
-            }
-        }
+        raycastingIt(ocTree.root, faces, epsilon, minx, miny, minz, steps);
 
         String fileDest = outputName;
         try {
