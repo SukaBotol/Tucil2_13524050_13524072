@@ -72,6 +72,10 @@ public class viewer {
             outputArea.setText("No output file");
             return;
         }
+        else if(!outputName.contains(".obj")){
+            outputArea.setText("Output must be a .obj file");
+            return;
+        }
 
         Task<String> buildTask = new Task<>() {
             @Override

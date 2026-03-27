@@ -51,7 +51,7 @@ public class test {
         }
 
         if (Tree.is_leaf(node)) {
-            return node.isActive ? 1 : 0;
+            return 1;
         }
 
         int count = 0;
@@ -123,26 +123,21 @@ public class test {
         private Node root;
 
         public Tree(vertex max, vertex min, int max_depth) {
-            root = new Node(starting_cube(max, min), null);
-            split_cube(root, 0, max_depth);
+            root = new Node(starting_cube(max, min));
         }
 
         public class Node {
             private vertex[] surrounding = new vertex[8];
-            private boolean isActive;
-            private Node parent;
             private Node[] children;
 
-            public Node(vertex[] surr, Node parent) {
+            public Node(vertex[] surr) {
                 this.surrounding = surr;
-                this.parent = parent;
-                this.isActive = false;
                 this.children = new Node[8];
             }
         }
 
         /* build starting cube */
-        public vertex[] starting_cube(vertex max, vertex min) {
+        public static vertex[] starting_cube(vertex max, vertex min) {
             double xlen = max.x - min.x, ylen = max.y - min.y, zlen = max.z - min.z, actualLen;
             if (xlen >= ylen) {
                 if (xlen >= zlen) {
@@ -159,23 +154,15 @@ public class test {
             }
 
             vertex[] temp = new vertex[8];
-            vertex num0 = new vertex(min.x, min.y, min.z + actualLen);
-            vertex num1 = new vertex(min.x + actualLen, min.y, min.z + actualLen);
-            vertex num2 = new vertex(min.x + actualLen, min.y, min.z);
-            vertex num3 = new vertex(min.x, min.y, min.z);
-            vertex num4 = new vertex(min.x, min.y + actualLen, min.z + actualLen);
-            vertex num5 = new vertex(min.x + actualLen, min.y + actualLen, min.z + actualLen);
-            vertex num6 = new vertex(min.x + actualLen, min.y + actualLen, min.z);
-            vertex num7 = new vertex(min.x, min.y + actualLen, min.z);
 
-            temp[0] = num0;
-            temp[1] = num1;
-            temp[2] = num2;
-            temp[3] = num3;
-            temp[4] = num4;
-            temp[5] = num5;
-            temp[6] = num6;
-            temp[7] = num7;
+            temp[0] = new vertex(min.x, min.y, min.z + actualLen);
+            temp[1] = new vertex(min.x + actualLen, min.y, min.z + actualLen);
+            temp[2] = new vertex(min.x + actualLen, min.y, min.z);
+            temp[3] = new vertex(min.x, min.y, min.z);
+            temp[4] = new vertex(min.x, min.y + actualLen, min.z + actualLen);
+            temp[5] = new vertex(min.x + actualLen, min.y + actualLen, min.z + actualLen);
+            temp[6] = new vertex(min.x + actualLen, min.y + actualLen, min.z);
+            temp[7] = new vertex(min.x, min.y + actualLen, min.z);
 
             // System.out.println("actualLen: "+actualLen);
             // for(int i=0;i<8;i++){
@@ -187,91 +174,91 @@ public class test {
         }
 
         /* split the nodes/cube into 8 equally sized cubes */
-        public void split_cube(Node root, int depth, int max_depth) {
-            // System.out.println("splitting cube!");
-            double currentLen = root.surrounding[5].x - root.surrounding[3].x;
-            if (depth >= max_depth) {
-                return;
-            }
+        // public void split_cube(Node root, int depth, int max_depth) {
+        //     // System.out.println("splitting cube!");
+        //     double currentLen = root.surrounding[5].x - root.surrounding[3].x;
+        //     if (depth >= max_depth) {
+        //         return;
+        //     }
 
-            if (depth + 1 < nodes.length) {
-                nodes[depth + 1] += 8;
-            }
+        //     if (depth + 1 < nodes.length) {
+        //         nodes[depth + 1] += 8;
+        //     }
 
-            // 0
-            vertex tempMax = new vertex(root.surrounding[0].x + currentLen / 2, root.surrounding[0].y + currentLen / 2,
-                    root.surrounding[0].z),
-                    tempMin = new vertex(root.surrounding[0].x, root.surrounding[0].y,
-                            root.surrounding[0].z - currentLen / 2);
-            Node temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[0] = temp;
+        //     // 0
+        //     vertex tempMax = new vertex(root.surrounding[0].x + currentLen / 2, root.surrounding[0].y + currentLen / 2,
+        //             root.surrounding[0].z),
+        //             tempMin = new vertex(root.surrounding[0].x, root.surrounding[0].y,
+        //                     root.surrounding[0].z - currentLen / 2);
+        //     Node temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[0] = temp;
 
-            // 1
-            tempMax = new vertex(root.surrounding[1].x, root.surrounding[1].y + currentLen / 2, root.surrounding[1].z);
-            tempMin = new vertex(root.surrounding[1].x - currentLen / 2, root.surrounding[1].y,
-                    root.surrounding[1].z - currentLen / 2);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[1] = temp;
+        //     // 1
+        //     tempMax = new vertex(root.surrounding[1].x, root.surrounding[1].y + currentLen / 2, root.surrounding[1].z);
+        //     tempMin = new vertex(root.surrounding[1].x - currentLen / 2, root.surrounding[1].y,
+        //             root.surrounding[1].z - currentLen / 2);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[1] = temp;
 
-            // 2
-            tempMax = new vertex(root.surrounding[2].x, root.surrounding[2].y + currentLen / 2,
-                    root.surrounding[2].z + currentLen / 2);
-            tempMin = new vertex(root.surrounding[2].x - currentLen / 2, root.surrounding[2].y, root.surrounding[2].z);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[2] = temp;
+        //     // 2
+        //     tempMax = new vertex(root.surrounding[2].x, root.surrounding[2].y + currentLen / 2,
+        //             root.surrounding[2].z + currentLen / 2);
+        //     tempMin = new vertex(root.surrounding[2].x - currentLen / 2, root.surrounding[2].y, root.surrounding[2].z);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[2] = temp;
 
-            // 3
-            tempMax = new vertex(root.surrounding[3].x + currentLen / 2, root.surrounding[3].y + currentLen / 2,
-                    root.surrounding[3].z + currentLen / 2);
-            tempMin = new vertex(root.surrounding[3].x, root.surrounding[3].y, root.surrounding[3].z);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[3] = temp;
+        //     // 3
+        //     tempMax = new vertex(root.surrounding[3].x + currentLen / 2, root.surrounding[3].y + currentLen / 2,
+        //             root.surrounding[3].z + currentLen / 2);
+        //     tempMin = new vertex(root.surrounding[3].x, root.surrounding[3].y, root.surrounding[3].z);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[3] = temp;
 
-            // 4
-            tempMax = new vertex(root.surrounding[4].x + currentLen / 2, root.surrounding[4].y, root.surrounding[4].z);
-            tempMin = new vertex(root.surrounding[4].x, root.surrounding[4].y - currentLen / 2,
-                    root.surrounding[4].z - currentLen / 2);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[4] = temp;
+        //     // 4
+        //     tempMax = new vertex(root.surrounding[4].x + currentLen / 2, root.surrounding[4].y, root.surrounding[4].z);
+        //     tempMin = new vertex(root.surrounding[4].x, root.surrounding[4].y - currentLen / 2,
+        //             root.surrounding[4].z - currentLen / 2);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[4] = temp;
 
-            // 5
-            tempMax = new vertex(root.surrounding[5].x, root.surrounding[5].y, root.surrounding[5].z);
-            tempMin = new vertex(root.surrounding[5].x - currentLen / 2, root.surrounding[5].y - currentLen / 2,
-                    root.surrounding[5].z - currentLen / 2);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[5] = temp;
+        //     // 5
+        //     tempMax = new vertex(root.surrounding[5].x, root.surrounding[5].y, root.surrounding[5].z);
+        //     tempMin = new vertex(root.surrounding[5].x - currentLen / 2, root.surrounding[5].y - currentLen / 2,
+        //             root.surrounding[5].z - currentLen / 2);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[5] = temp;
 
-            // 6
-            tempMax = new vertex(root.surrounding[6].x, root.surrounding[6].y, root.surrounding[6].z + currentLen / 2);
-            tempMin = new vertex(root.surrounding[6].x - currentLen / 2, root.surrounding[6].y - currentLen / 2,
-                    root.surrounding[6].z);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[6] = temp;
+        //     // 6
+        //     tempMax = new vertex(root.surrounding[6].x, root.surrounding[6].y, root.surrounding[6].z + currentLen / 2);
+        //     tempMin = new vertex(root.surrounding[6].x - currentLen / 2, root.surrounding[6].y - currentLen / 2,
+        //             root.surrounding[6].z);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[6] = temp;
 
-            // 7
-            tempMax = new vertex(root.surrounding[7].x + currentLen / 2, root.surrounding[7].y,
-                    root.surrounding[7].z + currentLen / 2);
-            tempMin = new vertex(root.surrounding[7].x, root.surrounding[7].y - currentLen / 2, root.surrounding[7].z);
-            temp = new Node(starting_cube(tempMax, tempMin), root);
-            root.children[7] = temp;
+        //     // 7
+        //     tempMax = new vertex(root.surrounding[7].x + currentLen / 2, root.surrounding[7].y,
+        //             root.surrounding[7].z + currentLen / 2);
+        //     tempMin = new vertex(root.surrounding[7].x, root.surrounding[7].y - currentLen / 2, root.surrounding[7].z);
+        //     temp = new Node(starting_cube(tempMax, tempMin));
+        //     root.children[7] = temp;
 
-            split_cube(root.children[0], depth + 1, max_depth);
-            split_cube(root.children[1], depth + 1, max_depth);
-            split_cube(root.children[2], depth + 1, max_depth);
-            split_cube(root.children[3], depth + 1, max_depth);
-            split_cube(root.children[4], depth + 1, max_depth);
-            split_cube(root.children[5], depth + 1, max_depth);
-            split_cube(root.children[6], depth + 1, max_depth);
-            split_cube(root.children[7], depth + 1, max_depth);
+        //     split_cube(root.children[0], depth + 1, max_depth);
+        //     split_cube(root.children[1], depth + 1, max_depth);
+        //     split_cube(root.children[2], depth + 1, max_depth);
+        //     split_cube(root.children[3], depth + 1, max_depth);
+        //     split_cube(root.children[4], depth + 1, max_depth);
+        //     split_cube(root.children[5], depth + 1, max_depth);
+        //     split_cube(root.children[6], depth + 1, max_depth);
+        //     split_cube(root.children[7], depth + 1, max_depth);
 
-            // for(int i=0;i<8;i++){
-            // System.out.println("num_"+i+":\n"+"x:
-            // "+root.children[0].surrounding[i].x+"\ny:
-            // "+root.children[0].surrounding[i].y+"\nz:
-            // "+root.children[0].surrounding[i].z+"\n");
-            // }
+        //     // for(int i=0;i<8;i++){
+        //     // System.out.println("num_"+i+":\n"+"x:
+        //     // "+root.children[0].surrounding[i].x+"\ny:
+        //     // "+root.children[0].surrounding[i].y+"\nz:
+        //     // "+root.children[0].surrounding[i].z+"\n");
+        //     // }
 
-        }
+        // }
 
         /* check if vertex is in a cube/node */
         public static boolean is_in_cube(Node node, vertex v) {
@@ -290,208 +277,172 @@ public class test {
             return true;
         }
 
-        /* Main function that writes into the destination file */
-        public static void build_cubes(String fileDest, Node node) {
-            if (is_leaf(node)) {
-                if (node.isActive) {
-                    StringBuilder temp = new StringBuilder();
-                    for (int i = 0; i < 8; i++) {
-                        temp.append("v " + node.surrounding[i].x + " " + node.surrounding[i].y + " "
-                                + node.surrounding[i].z + "\n");
-                    }
-                    temp.append("f " + (verticesCount + 3) + " " + (verticesCount + 2) + " " + (verticesCount + 1) + " "
-                            + verticesCount + "\n");
-                    temp.append("f " + verticesCount + " " + (verticesCount + 1) + " " + (verticesCount + 5) + " "
-                            + (verticesCount + 4) + "\n");
-                    temp.append("f " + verticesCount + " " + (verticesCount + 4) + " " + (verticesCount + 7) + " "
-                            + (verticesCount + 3) + "\n");
-                    temp.append("f " + (verticesCount + 1) + " " + (verticesCount + 2) + " " + (verticesCount + 6) + " "
-                            + (verticesCount + 5) + "\n");
-                    temp.append("f " + (verticesCount + 2) + " " + (verticesCount + 3) + " " + (verticesCount + 7) + " "
-                            + (verticesCount + 6) + "\n");
-                    temp.append("f " + (verticesCount + 4) + " " + (verticesCount + 5) + " " + (verticesCount + 6) + " "
-                            + (verticesCount + 7) + "\n");
+        /* Build a branch from node down to max_depth for the given intersection point (lazy building) */
+        public void build_branch(Node node, vertex intersect, int depth, int maxDepth) {
+            if (depth >= maxDepth || !is_in_cube(node, intersect)) {
+                return;
+            }
 
-                    try (FileWriter writer = new FileWriter(fileDest, true)) {
-                        writer.write(temp.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
+            double len = node.surrounding[5].x - node.surrounding[3].x;
+
+            for (int i=0;i<8;i++) {
+                if (node.children[i] == null) {
+                    node.children[i] = (new Node(octant_vertex(node, i, len)));
+                    if (depth + 1 < nodes.length) {
+                        nodes[depth + 1]++;
                     }
-                    verticesCount += 8;
                 }
-            } else {
+
+                if (is_in_cube(node.children[i], intersect)) {
+                    build_branch(node.children[i], intersect, depth + 1, maxDepth);
+                    break;
+                }
+            }
+        }
+
+        /* Create a specific child octant */
+        public Node octant_node(Node parent, int octant, double len) {
+            vertex tempMax, tempMin;
+
+            switch (octant) {
+                case 0:
+                    tempMax = new vertex(parent.surrounding[0].x + len / 2, parent.surrounding[0].y + len / 2,
+                            parent.surrounding[0].z);
+                    tempMin = new vertex(parent.surrounding[0].x, parent.surrounding[0].y,
+                            parent.surrounding[0].z - len / 2);
+                    break;
+                case 1: 
+                    tempMax = new vertex(parent.surrounding[1].x, parent.surrounding[1].y + len / 2, parent.surrounding[1].z);
+                    tempMin = new vertex(parent.surrounding[1].x - len / 2, parent.surrounding[1].y,
+                            parent.surrounding[1].z - len / 2);
+                    break;
+                case 2: 
+                    tempMax = new vertex(parent.surrounding[2].x, parent.surrounding[2].y + len / 2,
+                            parent.surrounding[2].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[2].x - len / 2, parent.surrounding[2].y, parent.surrounding[2].z);
+                    break;
+                case 3: 
+                    tempMax = new vertex(parent.surrounding[3].x + len / 2, parent.surrounding[3].y + len / 2,
+                            parent.surrounding[3].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[3].x, parent.surrounding[3].y, parent.surrounding[3].z);
+                    break;
+                case 4: 
+                    tempMax = new vertex(parent.surrounding[4].x + len / 2, parent.surrounding[4].y, parent.surrounding[4].z);
+                    tempMin = new vertex(parent.surrounding[4].x, parent.surrounding[4].y - len / 2,
+                            parent.surrounding[4].z - len / 2);
+                    break;
+                case 5: 
+                    tempMax = new vertex(parent.surrounding[5].x, parent.surrounding[5].y, parent.surrounding[5].z);
+                    tempMin = new vertex(parent.surrounding[5].x - len / 2, parent.surrounding[5].y - len / 2,
+                            parent.surrounding[5].z - len / 2);
+                    break;
+                case 6: 
+                    tempMax = new vertex(parent.surrounding[6].x, parent.surrounding[6].y, parent.surrounding[6].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[6].x - len / 2, parent.surrounding[6].y - len / 2,
+                            parent.surrounding[6].z);
+                    break;
+                case 7: 
+                    tempMax = new vertex(parent.surrounding[7].x + len / 2, parent.surrounding[7].y,
+                            parent.surrounding[7].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[7].x, parent.surrounding[7].y - len / 2, parent.surrounding[7].z);
+                    break;
+                default:
+                    return null;
+            }
+
+            return new Node(starting_cube(tempMax, tempMin));
+        }
+
+        public vertex[] octant_vertex(Node parent, int octant, double len) {
+            vertex tempMax, tempMin;
+
+            switch (octant) {
+                case 0:
+                    tempMax = new vertex(parent.surrounding[0].x + len / 2, parent.surrounding[0].y + len / 2,
+                            parent.surrounding[0].z);
+                    tempMin = new vertex(parent.surrounding[0].x, parent.surrounding[0].y,
+                            parent.surrounding[0].z - len / 2);
+                    break;
+                case 1: 
+                    tempMax = new vertex(parent.surrounding[1].x, parent.surrounding[1].y + len / 2, parent.surrounding[1].z);
+                    tempMin = new vertex(parent.surrounding[1].x - len / 2, parent.surrounding[1].y,
+                            parent.surrounding[1].z - len / 2);
+                    break;
+                case 2: 
+                    tempMax = new vertex(parent.surrounding[2].x, parent.surrounding[2].y + len / 2,
+                            parent.surrounding[2].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[2].x - len / 2, parent.surrounding[2].y, parent.surrounding[2].z);
+                    break;
+                case 3: 
+                    tempMax = new vertex(parent.surrounding[3].x + len / 2, parent.surrounding[3].y + len / 2,
+                            parent.surrounding[3].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[3].x, parent.surrounding[3].y, parent.surrounding[3].z);
+                    break;
+                case 4: 
+                    tempMax = new vertex(parent.surrounding[4].x + len / 2, parent.surrounding[4].y, parent.surrounding[4].z);
+                    tempMin = new vertex(parent.surrounding[4].x, parent.surrounding[4].y - len / 2,
+                            parent.surrounding[4].z - len / 2);
+                    break;
+                case 5: 
+                    tempMax = new vertex(parent.surrounding[5].x, parent.surrounding[5].y, parent.surrounding[5].z);
+                    tempMin = new vertex(parent.surrounding[5].x - len / 2, parent.surrounding[5].y - len / 2,
+                            parent.surrounding[5].z - len / 2);
+                    break;
+                case 6: 
+                    tempMax = new vertex(parent.surrounding[6].x, parent.surrounding[6].y, parent.surrounding[6].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[6].x - len / 2, parent.surrounding[6].y - len / 2,
+                            parent.surrounding[6].z);
+                    break;
+                case 7: 
+                    tempMax = new vertex(parent.surrounding[7].x + len / 2, parent.surrounding[7].y,
+                            parent.surrounding[7].z + len / 2);
+                    tempMin = new vertex(parent.surrounding[7].x, parent.surrounding[7].y - len / 2, parent.surrounding[7].z);
+                    break;
+                default:
+                    return null;
+            }
+
+            return starting_cube(tempMax, tempMin);
+        }
+
+        /* Main function that writes into the destination file */
+        public static void build_cubes(String fileDest, Node node, int depth, int max_depth) {
+            if (depth == max_depth) {
+                StringBuilder temp = new StringBuilder();
                 for (int i = 0; i < 8; i++) {
-                    build_cubes(fileDest, node.children[i]);
+                    temp.append("v " + node.surrounding[i].x + " " + node.surrounding[i].y + " "
+                            + node.surrounding[i].z + "\n");
+                }
+                temp.append("f " + (verticesCount + 3) + " " + (verticesCount + 2) + " " + (verticesCount + 1) + " "
+                        + verticesCount + "\n");
+                temp.append("f " + verticesCount + " " + (verticesCount + 1) + " " + (verticesCount + 5) + " "
+                        + (verticesCount + 4) + "\n");
+                temp.append("f " + verticesCount + " " + (verticesCount + 4) + " " + (verticesCount + 7) + " "
+                        + (verticesCount + 3) + "\n");
+                temp.append("f " + (verticesCount + 1) + " " + (verticesCount + 2) + " " + (verticesCount + 6) + " "
+                        + (verticesCount + 5) + "\n");
+                temp.append("f " + (verticesCount + 2) + " " + (verticesCount + 3) + " " + (verticesCount + 7) + " "
+                        + (verticesCount + 6) + "\n");
+                temp.append("f " + (verticesCount + 4) + " " + (verticesCount + 5) + " " + (verticesCount + 6) + " "
+                        + (verticesCount + 7) + "\n");
+
+                try (FileWriter writer = new FileWriter(fileDest, true)) {
+                    writer.write(temp.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                verticesCount += 8;
+            } else if (depth < max_depth) {
+                for (int i = 0; i < 8; i++) {
+                    if (node.children[i] != null) {
+                        build_cubes(fileDest, node.children[i], depth + 1, max_depth);
+                    }
                 }
             }
         }
     };
 
-    // Create a tree with starting vertices of max and min of x y and z
-
-    // public static void main(String[] args) throws Exception {
-    // Scanner scancli = new Scanner(System.in);
-    // System.out.println("File dir: ");
-    // String filedir = scancli.nextLine();
-    // System.out.println("reading " + filedir);
-    // File file = new File(filedir);
-
-    // try (Scanner read = new Scanner(file)) {
-    // while (read.hasNextLine()) {
-    // String data = read.nextLine();
-    // String[] splitData = data.trim().split("\\s+");
-    // if (splitData[0].equals("v")) {
-    // double x = Double.parseDouble(splitData[1]);
-    // double y = Double.parseDouble(splitData[2]);
-    // double z = Double.parseDouble(splitData[3]);
-    // vertex temp = new vertex(x, y, z);
-
-    // vertices.add(temp);
-    // find_extremes(temp);
-    // }
-    // }
-    // }
-    // // System.out.println("Max tree depth: ");
-    // // String maxD = scancli.nextLine();
-    // // int D = Integer.parseInt(maxD);
-    // int depth = 6;
-    // ocTree = new Tree(max, min, depth);
-
-    // try (Scanner read = new Scanner(file)) {
-    // while (read.hasNextLine()) {
-    // String data = read.nextLine();
-    // String[] splitData = data.trim().split("\\s+");
-
-    // // vertex alr stored
-    // // if (splitData[0].equals("v")) {
-    // // double x = Double.parseDouble(splitData[1]);
-    // // double y = Double.parseDouble(splitData[2]);
-    // // double z = Double.parseDouble(splitData[3]);
-    // // vertex temp = new vertex(x, y, z);
-    // // process_vertices(temp, ocTree.root);
-    // // }
-
-    // if (splitData[0].equals("f")) {
-    // int a = Integer.parseInt(splitData[1].split("/")[0]);
-
-    // // for quads
-    // for (int i = 2; i < splitData.length-1; i++) {
-    // int b = Integer.parseInt(splitData[i].split("/")[0]);
-    // int c = Integer.parseInt(splitData[i+1].split("/")[0]);
-
-    // face temp = new face(vertices.get(a-1), vertices.get(b-1),
-    // vertices.get(c-1));
-    // faces.add(temp);
-    // }
-    // }
-    // }
-    // }
-
-    // double rootlength = ocTree.root.surrounding[5].x -
-    // ocTree.root.surrounding[3].x;
-    // double steps = rootlength / Math.pow(2, depth);
-    // double epsilon = steps / 1000;
-
-    // double minx = ocTree.root.surrounding[3].x, miny =
-    // ocTree.root.surrounding[3].y, minz = ocTree.root.surrounding[3].z;
-    // double maxx = ocTree.root.surrounding[5].x, maxy =
-    // ocTree.root.surrounding[5].y, maxz = ocTree.root.surrounding[5].z;
-
-    // for (double y = miny + steps / 2; y<maxy; y+= steps){
-    // for (double z = minz + steps / 2; z<maxz; z+= steps) {
-    // vertex origin = new vertex(minx-steps, y, z);
-    // // x axis
-    // vertex dir = new vertex(1,0,0);
-    // for (face f: faces){
-    // vertex intersection = new vertex(0,0,0);
-    // if(raycasting(origin, dir, f, intersection)){
-    // intersection.x += epsilon;
-    // process_vertices(intersection, ocTree.root);
-    // }
-    // }
-    // }
-    // }
-
-    // for (double x = minx + steps / 2; x<maxx; x+= steps){
-    // for (double z = minz + steps / 2; z<maxz; z+= steps) {
-    // vertex origin = new vertex(x, miny-steps, z);
-    // // y axis
-    // vertex dir = new vertex(0,1,0);
-    // for (face f: faces){
-    // vertex intersection = new vertex(0,0,0);
-    // if(raycasting(origin, dir, f, intersection)){
-    // intersection.y += epsilon;
-    // process_vertices(intersection, ocTree.root);
-    // }
-    // }
-    // }
-    // }
-
-    // for (double x = minx + steps / 2; x<maxx; x+= steps){
-    // for (double y = miny + steps / 2; y<maxy; y+= steps) {
-    // vertex origin = new vertex(x, y, minz-steps);
-    // // z axis
-    // vertex dir = new vertex(0,0,1);
-    // for (face f: faces){
-    // vertex intersection = new vertex(0,0,0);
-    // if(raycasting(origin, dir, f, intersection)){
-    // intersection.z += epsilon;
-    // process_vertices(intersection, ocTree.root);
-    // }
-    // }
-    // }
-    // }
-
-    // System.out.println("save as: ");
-    // String fileDest = scancli.nextLine();
-    // // copied this from W3schools lmao
-    // try {
-    // File newFile = new File("./test/" + fileDest); // Create File object
-    // newFile.createNewFile();
-    // new FileWriter("./test/" + fileDest).close();
-    // } catch (IOException e) {
-    // System.out.println("An error occurred.");
-    // e.printStackTrace(); // Print error details
-    // }
-
-    // Tree.build_cubes("./test/" + fileDest, ocTree.root);
-
-    // // System.out.println("starting cube: "+ocTree.root.isActive);
-    // // System.out.println("starting cube 1.0:
-    // "+ocTree.root.children[0].isActive);
-    // // System.out.println("starting cube 1.1:
-    // "+ocTree.root.children[1].isActive);
-    // // System.out.println("starting cube 1.2:
-    // "+ocTree.root.children[2].isActive);
-    // // System.out.println("starting cube 1.3:
-    // "+ocTree.root.children[3].isActive);
-    // // System.out.println("starting cube 1.4:
-    // "+ocTree.root.children[4].isActive);
-    // // System.out.println("starting cube 1.5:
-    // "+ocTree.root.children[5].isActive);
-    // // System.out.println("starting cube 1.6:
-    // "+ocTree.root.children[6].isActive);
-    // // System.out.println("starting cube 1.7:
-    // "+ocTree.root.children[7].isActive);
-
-    // // System.out.println("Cube?\n"+"x: "+(max.x-min.x)+"\ny:
-    // "+(max.y-min.y)+"\nz:
-    // // "+(max.z-min.z)+"\n");
-    // // System.out.println("MIN:\n"+"x: "+min.x+"\ny: "+min.y+"\nz: "+min.z+"\n");
-    // }
-
-    /* Populating the isTrue boolean on corresponding nodes */
-    public static void process_vertices(vertex v, Tree.Node node) {
-        if (Tree.is_in_cube(node, v)) {
-            node.isActive = true;
-            for (int i = 0; i < 8; i++) {
-                if (node.children[i] != null) {
-                    process_vertices(v, node.children[i]);
-                }
-            }
-        }
-        // System.out.println("x: "+v.x+"\ny: "+v.y+"\nz: "+v.z+"\n");
-    }
+    
 
     /* Just to find max and min of every vertices */
     public static void find_extremes(vertex temp) {
@@ -516,12 +467,12 @@ public class test {
     }
 
     public static void raycastingIt(Tree.Node node, ArrayList<face> candidateFaces, double epsilon,
-            double rootMinX, double rootMinY, double rootMinZ, double step, int depth) {
+            double rootMinX, double rootMinY, double rootMinZ, double step, int depth, int maxDepth) {
         if (candidateFaces.isEmpty()) {
             return;
         }
 
-        if (Tree.is_leaf(node)) {
+        if (depth >= maxDepth) {
             vertex center = new vertex(
                     (node.surrounding[3].x + node.surrounding[5].x) / 2,
                     (node.surrounding[3].y + node.surrounding[5].y) / 2,
@@ -535,7 +486,7 @@ public class test {
                 if (raycasting(origin, dir, f, intersection)) {
                     intersection.x += epsilon;
                     if (Tree.is_in_cube(node, intersection)) {
-                        node.isActive = true;
+                        ocTree.build_branch(ocTree.root, intersection, 0, maxDepth);
                         return;
                     }
                 }
@@ -545,7 +496,7 @@ public class test {
                 if (raycasting(origin, dir, f, intersection)) {
                     intersection.y += epsilon;
                     if (Tree.is_in_cube(node, intersection)) {
-                        node.isActive = true;
+                        ocTree.build_branch(ocTree.root, intersection, 0, maxDepth);
                         return;
                     }
                 }
@@ -555,7 +506,7 @@ public class test {
                 if (raycasting(origin, dir, f, intersection)) {
                     intersection.z += epsilon;
                     if (Tree.is_in_cube(node, intersection)) {
-                        node.isActive = true;
+                        ocTree.build_branch(ocTree.root, intersection, 0, maxDepth);
                         return;
                     }
                 }
@@ -563,11 +514,10 @@ public class test {
             return;
         }
 
+        double currentLen = node.surrounding[5].x - node.surrounding[3].x;
+        
         for (int i = 0; i < 8; i++) {
-            if (node.children[i] == null) {
-                continue;
-            }
-
+            vertex[] surroundTheChild = ocTree.octant_vertex(node, i, currentLen);
             ArrayList<face> childFaces = new ArrayList<face>();
             for (face f : candidateFaces) {
                 double faceMinX = Math.min(f.a.x, Math.min(f.b.x, f.c.x));
@@ -577,12 +527,13 @@ public class test {
                 double faceMaxY = Math.max(f.a.y, Math.max(f.b.y, f.c.y));
                 double faceMaxZ = Math.max(f.a.z, Math.max(f.b.z, f.c.z));
 
-                double nodeMinX = node.children[i].surrounding[3].x;
-                double nodeMinY = node.children[i].surrounding[3].y;
-                double nodeMinZ = node.children[i].surrounding[3].z;
-                double nodeMaxX = node.children[i].surrounding[5].x;
-                double nodeMaxY = node.children[i].surrounding[5].y;
-                double nodeMaxZ = node.children[i].surrounding[5].z;
+                // cuz we're not creating the whole tree
+                double nodeMinX = surroundTheChild[3].x;
+                double nodeMinY = surroundTheChild[3].y;
+                double nodeMinZ = surroundTheChild[3].z;
+                double nodeMaxX = surroundTheChild[5].x;
+                double nodeMaxY = surroundTheChild[5].y;
+                double nodeMaxZ = surroundTheChild[5].z;
 
                 if (!(faceMaxX < nodeMinX || faceMinX > nodeMaxX ||
                         faceMaxY < nodeMinY || faceMinY > nodeMaxY ||
@@ -592,9 +543,11 @@ public class test {
             }
 
             if (!childFaces.isEmpty()) {
-                node.isActive = true;
+                if (node.children[i] == null) {
+                    node.children[i] = ocTree.octant_node(node, i, currentLen);
+                }
                 raycastingIt(node.children[i], childFaces, epsilon, rootMinX, rootMinY, rootMinZ,
-                        step, depth + 1);
+                        step, depth + 1, maxDepth);
             } else if (depth + 1 < skipNodes.length) {
                 skipNodes[depth + 1]++;
             }
@@ -664,7 +617,7 @@ public class test {
         double minx = ocTree.root.surrounding[3].x, miny =
                 ocTree.root.surrounding[3].y, minz = ocTree.root.surrounding[3].z;
 
-        raycastingIt(ocTree.root, faces, epsilon, minx, miny, minz, steps, 0);
+        raycastingIt(ocTree.root, faces, epsilon, minx, miny, minz, steps, 0, depth);
 
         String fileDest = outputName;
         String savedPath = "./test/" + fileDest;
@@ -681,7 +634,7 @@ public class test {
             e.printStackTrace();
         }
 
-        Tree.build_cubes(savedPath, ocTree.root);
+        Tree.build_cubes(savedPath, ocTree.root, 0, depth);
 
         int voxelCount = countLeaf(ocTree.root);
         int generatedVertexCount = voxelCount * 8;
