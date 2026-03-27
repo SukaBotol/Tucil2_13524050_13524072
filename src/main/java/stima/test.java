@@ -11,6 +11,8 @@ public class test {
     static vertex min = new vertex(999999, 999999, 999999);
     static Tree ocTree;
     static int verticesCount = 1;
+    static int[] nodes = new int[0];
+    static int[] skipNodes = new int[0];
 
     public static class vertex {
         public double x, y, z;
@@ -34,6 +36,32 @@ public class test {
 
     static ArrayList<vertex> vertices = new ArrayList<vertex>();
     static ArrayList<face> faces = new ArrayList<face>();
+
+    private static void reset(int depth) {
+        nodes = new int[depth + 1];
+        skipNodes = new int[depth + 1];
+        if (nodes.length > 0) {
+            nodes[0] = 1;
+        }
+    }
+
+    private static int countLeaf(Tree.Node node) {
+        if (node == null) {
+            return 0;
+        }
+
+        if (Tree.is_leaf(node)) {
+            return node.isActive ? 1 : 0;
+        }
+
+        int count = 0;
+        for (int i = 0; i < 8; i++) {
+            if (node.children[i] != null) {
+                count += countLeaf(node.children[i]);
+            }
+        }
+        return count;
+    }
 
     public static vertex subtract(vertex a, vertex b) {
         return new vertex(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -165,6 +193,11 @@ public class test {
             if (depth >= max_depth) {
                 return;
             }
+
+            if (depth + 1 < nodes.length) {
+                nodes[depth + 1] += 8;
+            }
+
             // 0
             vertex tempMax = new vertex(root.surrounding[0].x + currentLen / 2, root.surrounding[0].y + currentLen / 2,
                     root.surrounding[0].z),
@@ -483,7 +516,7 @@ public class test {
     }
 
     public static void raycastingIt(Tree.Node node, ArrayList<face> candidateFaces, double epsilon,
-            double rootMinX, double rootMinY, double rootMinZ, double step) {
+            double rootMinX, double rootMinY, double rootMinZ, double step, int depth) {
         if (candidateFaces.isEmpty()) {
             return;
         }
@@ -561,17 +594,22 @@ public class test {
             if (!childFaces.isEmpty()) {
                 node.isActive = true;
                 raycastingIt(node.children[i], childFaces, epsilon, rootMinX, rootMinY, rootMinZ,
-                        step);
+                        step, depth + 1);
+            } else if (depth + 1 < skipNodes.length) {
+                skipNodes[depth + 1]++;
             }
         }
     }
 
     public static String objToVoxeL(File file, int depth, String outputName) throws Exception {
+        long startNs = System.nanoTime();
+
         max = new vertex(-999999, -999999, -999999);
         min = new vertex(999999, 999999, 999999);
         verticesCount = 1;
         vertices.clear();
         faces.clear();
+        reset(depth);
 
         try (Scanner read = new Scanner(file)) {
             while (read.hasNextLine()) {
@@ -626,23 +664,48 @@ public class test {
         double minx = ocTree.root.surrounding[3].x, miny =
                 ocTree.root.surrounding[3].y, minz = ocTree.root.surrounding[3].z;
 
-        raycastingIt(ocTree.root, faces, epsilon, minx, miny, minz, steps);
+        raycastingIt(ocTree.root, faces, epsilon, minx, miny, minz, steps, 0);
 
         String fileDest = outputName;
+        String savedPath = "./test/" + fileDest;
         try {
-            File newFile = new File("./test/" + fileDest); 
+            File newFile = new File(savedPath);
             File parent = newFile.getParentFile();
             if (parent != null) {
                 parent.mkdirs();
             }
             newFile.createNewFile();
-            new FileWriter("./test/" + fileDest).close();
+            new FileWriter(savedPath).close();
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
 
-        Tree.build_cubes("./test/" + fileDest, ocTree.root);
-        return "Saved " + fileDest;
+        Tree.build_cubes(savedPath, ocTree.root);
+
+        int voxelCount = countLeaf(ocTree.root);
+        int generatedVertexCount = voxelCount * 8;
+        int generatedFaceCount = voxelCount * 6;
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+
+        StringBuilder output = new StringBuilder();
+        output.append("Created Voxel: ").append(voxelCount).append("\n");
+        output.append("Created Vertex: ").append(generatedVertexCount).append("\n");
+        output.append("Created Faces: ").append(generatedFaceCount).append("\n");
+        output.append("Node Stats:\n");
+        for (int d = 1; d <= depth; d++) {
+            output.append(d).append(" : ").append(nodes[d]).append("\n");
+        }
+        output.append("Skipped Nodes Stats:\n");
+        for (int d = 1; d <= depth; d++) {
+            output.append(d).append(" : ").append(skipNodes[d]).append("\n");
+        }
+        output.append("Depth: ").append(depth).append("\n");
+        output.append("Time: ").append(elapsedMs).append(" ms\n");
+        output.append(".obj Saved To: ").append(new File(savedPath).getAbsolutePath()).append("\n");
+
+        String summaryText = output.toString();
+        System.out.print(summaryText);
+        return summaryText;
     }
 }
