@@ -63,19 +63,4 @@
             </plugin>
         </plugins>
     </build>
-
-      <profiles>
-        <profile>
-          <id>ui</id>
-          <properties>
-            <app.mainClass>stima.app</app.mainClass>
-          </properties>
-        </profile>
-        <profile>
-          <id>viewer3d</id>
-          <properties>
-            <app.mainClass>stima.viewer3D</app.mainClass>
-          </properties>
-        </profile>
-      </profiles>
 </project>

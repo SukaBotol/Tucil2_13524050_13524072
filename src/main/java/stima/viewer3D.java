@@ -12,9 +12,13 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class viewer3D extends Application {
@@ -40,7 +44,7 @@ public class viewer3D extends Application {
     private final List<int[]> edges = new ArrayList<>();
 
     private double angleY = 0.0;
-    private double scale = 900.0;
+    private double scale = 1200.0;
     private final double zoomSpeed = 25;
     private final Set<KeyCode> keys = new HashSet<>();
 
@@ -49,11 +53,36 @@ public class viewer3D extends Application {
         Canvas canvas = new Canvas(1000, 700);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        // load precompiled voxel
-        String filename = "cowvox";
-        loadObjVoxel("test/" + filename + ".obj");
+        String path = "test/cowvox.obj";
+        loadObjVoxel(path);
 
-        Scene scene = new Scene(new StackPane(canvas));
+        Button chooseObjButton = new Button("Choose .obj");
+        Label loadedObjLabel = new Label("Loaded: " + new File(path).getName());
+
+        chooseObjButton.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ files", "*.obj"));
+
+            File dir = new File("test");
+            if (dir.isDirectory()) {
+                chooser.setInitialDirectory(dir);
+            }
+
+            File selected = chooser.showOpenDialog(stage);
+            if (selected == null) {
+                return;
+            }
+
+            loadObjVoxel(selected.getAbsolutePath());
+            canvas.requestFocus();
+        });
+
+        HBox topBar = new HBox(chooseObjButton, loadedObjLabel);
+        BorderPane root = new BorderPane();
+        root.setTop(topBar);
+        root.setCenter(canvas);
+
+        Scene scene = new Scene(root, 1000, 740);
         scene.setOnKeyPressed(e -> keys.add(e.getCode()));
         scene.setOnKeyReleased(e -> keys.remove(e.getCode()));
 
@@ -70,6 +99,12 @@ public class viewer3D extends Application {
                 render(gc, canvas.getWidth(), canvas.getHeight());
             }
         }.start();
+    }
+
+    public Stage openWindow() {
+        Stage viewerStage = new Stage();
+        start(viewerStage);
+        return viewerStage;
     }
 
     private void loadObjVoxel(String path) {
@@ -98,7 +133,47 @@ public class viewer3D extends Application {
             System.err.println("failed");
         }
 
+        // baka centering problem
+        // recompute center of the obj file
+
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double minZ = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        double maxZ = Double.NEGATIVE_INFINITY;
+        for (double[] v : vertex) {
+            if (v[0] < minX)
+                minX = v[0];
+            if (v[1] < minY)
+                minY = v[1];
+            if (v[2] < minZ)
+                minZ = v[2];
+            if (v[0] > maxX)
+                maxX = v[0];
+            if (v[1] > maxY)
+                maxY = v[1];
+            if (v[2] > maxZ)
+                maxZ = v[2];
+        }
+        double centerX = (minX + maxX) / 2.0;
+        double centerY = (minY + maxY) / 2.0;
+        double centerZ = (minZ + maxZ) / 2.0;
+        double maxSize = Math.max(maxX - minX, Math.max(maxY - minY, maxZ - minZ));
+
+        // recenter all vertex
+        for (double[] v : vertex) {
+            v[0] = (v[0] - centerX) * 2.0 / maxSize;
+            v[1] = (v[1] - centerY) * 2.0 / maxSize;
+            v[2] = (v[2] - centerZ) * 2.0 / maxSize;
+        }
+
+        // overwrite all verteices
         vertices = vertex.toArray(new double[0][0]);
+
+        if (loadedObjLabel != null) {
+            loadedObjLabel.setText("Loaded: " + file.getName());
+        }
 
         // cube edges manual
         for (int i = 0; i + 7 < vertices.length; i += 8) {
@@ -136,8 +211,9 @@ public class viewer3D extends Application {
         if (keys.contains(KeyCode.S))
             scale -= zoomSpeed;
 
-        // if (focalLength < 10)
-        // focalLength = 10;
+        if (scale < 50) {
+            scale = 50;
+        }
     }
 
     // ref
@@ -152,7 +228,7 @@ public class viewer3D extends Application {
         double[][] projections = new double[vertices.length][2];
         double xOffset = w / 2.0;
         double yOffset = h / 2.0;
-        //double zOffset = 4.0;
+        // double zOffset = 4.0;
 
         for (int i = 0; i < vertices.length; i++) {
             double x3D = vertices[i][0];
@@ -163,7 +239,7 @@ public class viewer3D extends Application {
             double rotatedX = x3D * Math.cos(angleY) - z3D * Math.sin(angleY);
             // double rotatedZ = x3D * Math.sin(angleY) + z3D * Math.cos(angleY);
 
-            // just realize we can just ignore z rot and it looks fine 
+            // just realize we can just ignore z rot and it looks fine
             // well its ortoghraphic now
             double x2D = rotatedX * scale + xOffset;
             double y2D = -y3D * scale + yOffset;
