@@ -47,6 +47,7 @@ public class viewer3D extends Application {
     private double scale = 1200.0;
     private final double zoomSpeed = 25;
     private final Set<KeyCode> keys = new HashSet<>();
+    private Label loadedObjLabel;
 
     @Override
     public void start(Stage stage) {
@@ -57,7 +58,7 @@ public class viewer3D extends Application {
         loadObjVoxel(path);
 
         Button chooseObjButton = new Button("Choose .obj");
-        Label loadedObjLabel = new Label("Loaded: " + new File(path).getName());
+        loadedObjLabel = new Label("Loaded: " + new File(path).getName());
 
         chooseObjButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
