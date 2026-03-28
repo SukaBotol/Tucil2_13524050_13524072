@@ -48,6 +48,7 @@ public class viewer3D extends Application {
     private final double zoomSpeed = 25;
     private final Set<KeyCode> keys = new HashSet<>();
     private Label loadedObjLabel;
+    private Label tutorial;
 
     @Override
     public void start(Stage stage) {
@@ -59,6 +60,7 @@ public class viewer3D extends Application {
 
         Button chooseObjButton = new Button("Choose .obj");
         loadedObjLabel = new Label("Loaded: " + new File(path).getName());
+        tutorial = new Label("         WASD to rotate and zoom");
 
         chooseObjButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
@@ -78,7 +80,7 @@ public class viewer3D extends Application {
             canvas.requestFocus();
         });
 
-        HBox topBar = new HBox(chooseObjButton, loadedObjLabel);
+        HBox topBar = new HBox(chooseObjButton, loadedObjLabel, tutorial);
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(canvas);
