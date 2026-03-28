@@ -60,7 +60,7 @@ public class viewer3D extends Application {
 
         Button chooseObjButton = new Button("Choose .obj");
         loadedObjLabel = new Label("Loaded: " + new File(path).getName());
-        tutorial = new Label("WASD to rotate and zoom");
+        tutorial = new Label("         WASD to rotate and zoom");
 
         chooseObjButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
