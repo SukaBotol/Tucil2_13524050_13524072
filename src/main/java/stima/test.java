@@ -1,5 +1,6 @@
 package stima;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class test {
         }
 
         if (Tree.is_leaf(node)) {
-            return 1;
+            return node.isActive ? 1 : 0;
         }
 
         int count = 0;
@@ -129,10 +130,12 @@ public class test {
         public class Node {
             private vertex[] surrounding = new vertex[8];
             private Node[] children;
+            private boolean isActive;
 
             public Node(vertex[] surr) {
                 this.surrounding = surr;
                 this.children = new Node[8];
+                this.isActive = false;
             }
         }
 
@@ -406,8 +409,12 @@ public class test {
         }
 
         /* Main function that writes into the destination file */
-        public static void build_cubes(String fileDest, Node node, int depth, int max_depth) {
+        public static void build_cubes(BufferedWriter writer, Node node, int depth, int max_depth) throws IOException {
             if (depth == max_depth) {
+                if (!node.isActive) {
+                    return;
+                }
+
                 StringBuilder temp = new StringBuilder();
                 for (int i = 0; i < 8; i++) {
                     temp.append("v " + node.surrounding[i].x + " " + node.surrounding[i].y + " "
@@ -426,16 +433,12 @@ public class test {
                 temp.append("f " + (verticesCount + 4) + " " + (verticesCount + 5) + " " + (verticesCount + 6) + " "
                         + (verticesCount + 7) + "\n");
 
-                try (FileWriter writer = new FileWriter(fileDest, true)) {
-                    writer.write(temp.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                writer.write(temp.toString());
                 verticesCount += 8;
             } else if (depth < max_depth) {
                 for (int i = 0; i < 8; i++) {
                     if (node.children[i] != null) {
-                        build_cubes(fileDest, node.children[i], depth + 1, max_depth);
+                        build_cubes(writer, node.children[i], depth + 1, max_depth);
                     }
                 }
             }
@@ -486,7 +489,7 @@ public class test {
                 if (raycasting(origin, dir, f, intersection)) {
                     intersection.x += epsilon;
                     if (Tree.is_in_cube(node, intersection)) {
-                        ocTree.build_branch(ocTree.root, intersection, 0, maxDepth);
+                        node.isActive = true;
                         return;
                     }
                 }
@@ -496,7 +499,7 @@ public class test {
                 if (raycasting(origin, dir, f, intersection)) {
                     intersection.y += epsilon;
                     if (Tree.is_in_cube(node, intersection)) {
-                        ocTree.build_branch(ocTree.root, intersection, 0, maxDepth);
+                        node.isActive = true;
                         return;
                     }
                 }
@@ -506,7 +509,7 @@ public class test {
                 if (raycasting(origin, dir, f, intersection)) {
                     intersection.z += epsilon;
                     if (Tree.is_in_cube(node, intersection)) {
-                        ocTree.build_branch(ocTree.root, intersection, 0, maxDepth);
+                        node.isActive = true;
                         return;
                     }
                 }
@@ -634,7 +637,9 @@ public class test {
             e.printStackTrace();
         }
 
-        Tree.build_cubes(savedPath, ocTree.root, 0, depth);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(savedPath))) {
+            Tree.build_cubes(writer, ocTree.root, 0, depth);
+        }
 
         int voxelCount = countLeaf(ocTree.root);
         int generatedVertexCount = voxelCount * 8;
