@@ -466,7 +466,7 @@ public class test {
         }
     }
 
-    public static void raycastingIt(Tree.Node node, ArrayList<face> candidateFaces, double epsilon,
+    public static void markActiveVoxel(Tree.Node node, ArrayList<face> candidateFaces, double epsilon,
             double rootMinX, double rootMinY, double rootMinZ, double step, int depth, int maxDepth) {
         if (candidateFaces.isEmpty()) {
             return;
@@ -546,7 +546,7 @@ public class test {
                 if (node.children[i] == null) {
                     node.children[i] = ocTree.octant_node(node, i, currentLen);
                 }
-                raycastingIt(node.children[i], childFaces, epsilon, rootMinX, rootMinY, rootMinZ,
+                markActiveVoxel(node.children[i], childFaces, epsilon, rootMinX, rootMinY, rootMinZ,
                         step, depth + 1, maxDepth);
             } else if (depth + 1 < skipNodes.length) {
                 skipNodes[depth + 1]++;
@@ -617,7 +617,7 @@ public class test {
         double minx = ocTree.root.surrounding[3].x, miny =
                 ocTree.root.surrounding[3].y, minz = ocTree.root.surrounding[3].z;
 
-        raycastingIt(ocTree.root, faces, epsilon, minx, miny, minz, steps, 0, depth);
+        markActiveVoxel(ocTree.root, faces, epsilon, minx, miny, minz, steps, 0, depth);
 
         String fileDest = outputName;
         String savedPath = "./test/" + fileDest;
