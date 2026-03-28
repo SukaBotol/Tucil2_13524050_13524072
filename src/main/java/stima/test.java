@@ -548,6 +548,9 @@ public class test {
             if (!childFaces.isEmpty()) {
                 if (node.children[i] == null) {
                     node.children[i] = ocTree.octant_node(node, i, currentLen);
+                    if (depth + 1 < nodes.length) {
+                        nodes[depth + 1]++;
+                    }
                 }
                 markActiveVoxel(node.children[i], childFaces, epsilon, rootMinX, rootMinY, rootMinZ,
                         step, depth + 1, maxDepth);
